@@ -63,6 +63,7 @@ typedef struct {
     e_sectionheader** shtable;
 } e_headers;
 
+e_headers* handleHeaders(char* contents);
 e_fileheader* handleFileHeader(char* contents);
 e_programheader** handlePHTable(char* contents, e_fileheader* fileheader);
 e_sectionheader** handleSHTable(char* contents, e_fileheader* fileheader);

@@ -26,7 +26,8 @@ char*   returnSHFlag  (uint64_t value);
 uint8_t* fileHandler  (char* filename);
 void describeFileHeader(e_fileheader* fileheader);
 void describePHTable(e_fileheader* fileheader, e_programheader** phtable);
-void describeSHTable(char* contents, e_fileheader* fileheader, e_sectionheader** shtable);
+void describeSHTable(e_fileheader* fileheader, e_sectionheader** shtable);
+void describeHeaders(e_headers* headers);
 
 char* returnOSABI(uint8_t value) {
     switch (value) {
@@ -172,7 +173,13 @@ char* returnSHFlag(uint64_t value) {
     }
 }
 
-void describeSHTable(char* contents, e_fileheader* fileheader, e_sectionheader** shtable) {
+void describeHeaders(e_headers* headers) {
+    describeFileHeader(headers->fileheader);
+    describePHTable(headers->fileheader, headers->phtable);
+    describeSHTable(headers->fileheader, headers->shtable);
+}
+
+void describeSHTable(e_fileheader* fileheader, e_sectionheader** shtable) {
     printf("\n##########################################\n\n");
     PRINTCOLOR(BBLUE, "SECTION HEADER TABLE\n\n");
 
@@ -250,7 +257,7 @@ uint8_t* fileHandler(char* filename) {
     
     fseek(file, 0, SEEK_END);
     unsigned int size = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    fseek(file, 0, SEEK_SET); // Finds the file size
 
     uint8_t* contents = (uint8_t*) malloc(size);
     fread(contents, sizeof(uint8_t), size, file);
@@ -269,17 +276,8 @@ int main(int argc, char** argv) {
         contents = fileHandler(argv[1]);
     }
 
-    e_fileheader* fileheader = handleFileHeader(contents);
-    e_headers* headers = (e_headers*) malloc(sizeof(e_headers));
-    headers->fileheader = fileheader;
-    
-    describeFileHeader(fileheader);
-
-    e_programheader** phtable = handlePHTable(contents, fileheader);
-    describePHTable(fileheader, phtable);
-
-    e_sectionheader** shtable = handleSHTable(contents, fileheader);
-    describeSHTable(contents, fileheader, shtable);
+    e_headers* headers = handleHeaders(contents);
+    describeHeaders(headers);
 
     return 0;
 }

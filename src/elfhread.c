@@ -25,6 +25,16 @@ uint64_t combineBytes(unsigned int bytes, uint8_t* contents, unsigned int index,
     else                 return lilresult; // if it is little endian
 }
 
+e_headers* handleHeaders(char* contents) {
+    e_headers* headers = (e_headers*) malloc(sizeof(e_headers));
+
+    headers->fileheader = handleFileHeader(contents);
+    headers->phtable = handlePHTable(contents, headers->fileheader);
+    headers->shtable = handleSHTable(contents, headers->fileheader);
+
+    return headers;
+}
+
 e_sectionheader** handleSHTable(char* contents, e_fileheader* fileheader) {
     e_sectionheader** shtable = (e_sectionheader**) malloc(sizeof(e_sectionheader*));
 
@@ -88,7 +98,6 @@ e_fileheader* handleFileHeader(char* contents) {
     e_fileheader* fileheader = (e_fileheader*) malloc(sizeof(e_fileheader));
 
     for (unsigned int i = 0x00; i <= 0x09; i++) {
-        // printf("%d %x\n", i, contents[i]);
         fileheader->e_ident[i] = contents[i];
     }
 
